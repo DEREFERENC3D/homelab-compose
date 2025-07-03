@@ -1,0 +1,22 @@
+services:
+  ntfy:
+    container_name: ntfy
+    restart: unless-stopped
+    image: binwiederhier/ntfy
+    command:
+      - serve
+    volumes:
+      - ./volumes/ntfy/etc/ntfy:/etc/ntfy:ro
+      - ./volumes/ntfy/var/cache/ntfy:/var/cache/ntfy
+      - ./volumes/ntfy/var/lib/ntfy:/var/lib/ntfy
+    networks:
+      default:
+        ipv4_address: 10.1.3.2
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.3.0/24
+          gateway: 10.1.3.1
