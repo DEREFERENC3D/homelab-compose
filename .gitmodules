@@ -1,0 +1,4 @@
+[submodule "mattermost"]
+	path = mattermost
+	url = https://github.com/DEREFERENC3D/mattermost-docker
+	branch = openwrt
