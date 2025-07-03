@@ -1,0 +1,31 @@
+services:
+  redis:
+    image: redis
+    restart: unless-stopped
+    volumes:
+      - ./volumes/redis/data:/data
+    networks:
+      default:
+        ipv4_address: 10.1.7.2
+  serverless-redis-http:
+    image: hiett/serverless-redis-http:latest
+    environment:
+      SRH_MODE: env
+      SRH_CONNECTION_STRING: redis://10.1.7.2:6379
+    env_file:
+      - run.env
+      - path: run.env.local
+        required: false
+    ports:
+      - 6379:6379
+    networks:
+      default:
+        ipv4_address: 10.1.7.3
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.7.0/24
+          gateway: 10.1.7.1
