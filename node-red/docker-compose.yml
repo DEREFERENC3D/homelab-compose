@@ -1,0 +1,17 @@
+services:
+  node-red:
+    image: nodered/node-red
+    restart: unless-stopped
+    volumes:
+      - ./volumes/node-red/data:/data
+    networks:
+      default:
+        ipv4_address: 10.1.6.2
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.6.0/24
+          gateway: 10.1.6.1
