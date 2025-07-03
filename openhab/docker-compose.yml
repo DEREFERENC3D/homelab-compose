@@ -1,0 +1,27 @@
+services:
+  openhab:
+    container_name: openhab
+    restart: unless-stopped
+    image: openhab/openhab:${OPENHAB_VERSION_TAG}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+#      - /etc/timezone:/etc/timezone
+      - ./volumes/openhab/addons:/openhab/addons
+      - ./volumes/openhab/conf:/openhab/conf
+      - ./volumes/openhab/userdata:/openhab/userdata
+    environment:
+      - CRYPTO_POLICY=unlimited
+      - EXTRA_JAVA_OPTS=-Duser.timezone=${TIMEZONE}
+    ports:
+      - 8080:8080
+    networks:
+      default:
+        ipv4_address: 10.1.9.2
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.9.0/24
+          gateway: 10.1.9.1
