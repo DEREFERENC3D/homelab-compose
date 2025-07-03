@@ -2,3 +2,7 @@
 	path = mattermost
 	url = https://github.com/DEREFERENC3D/mattermost-docker
 	branch = openwrt
+[submodule "piped"]
+	path = piped
+	url = https://github.com/DEREFERENC3D/piped-docker
+	branch = openwrt
