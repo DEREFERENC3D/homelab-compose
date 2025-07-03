@@ -1,0 +1,38 @@
+services:
+  stalwart:
+    image: stalwartlabs/stalwart
+    restart: unless-stopped
+    volumes:
+      - ./volumes/stalwart/opt/stalwart:/opt/stalwart
+      - /etc/acme:/opt/acme:ro
+    ports:
+      - 143:143
+      - 993:993
+      - 25:25
+      - 587:587
+      - 465:465
+    networks:
+      default:
+        ipv4_address: 10.1.8.2
+        aliases:
+          - ${DOMAIN}
+  roundcube:
+    image: roundcube/roundcubemail
+    restart: unless-stopped
+    environment:
+      ROUNDCUBEMAIL_DEFAULT_HOST: ${DOMAIN}
+      ROUNDCUBEMAIL_SMTP_SERVER: ${DOMAIN}
+    volumes:
+      - ./volumes/roundcube/var/roundcube/config:/var/roundcube/config
+      - ./volumes/roundcube/var/roundcube/db:/var/roundcube/db
+    networks:
+      default:
+        ipv4_address: 10.1.8.3
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.8.0/24
+          gateway: 10.1.8.1
