@@ -1,0 +1,24 @@
+services:
+  mumble:
+    container_name: mumble
+    restart: unless-stopped
+    image: mumblevoip/mumble-server
+    volumes:
+      - ./volumes/mumble/data:/data
+    env_file:
+      - run.env
+      - path: run.env.local
+        required: false
+    ports:
+      - 64738:64738
+    networks:
+      default:
+        ipv4_address: 10.1.4.2
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.4.0/24
+          gateway: 10.1.4.1
