@@ -1,0 +1,19 @@
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: ghcr.io/home-assistant/home-assistant:stable
+    volumes:
+      - ./volumes/homeassistant/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    networks:
+      default:
+        ipv4_address: 10.1.9.2
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.9.0/24
+          gateway: 10.1.9.1
