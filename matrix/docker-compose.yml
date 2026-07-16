@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  synapse:
+    image: docker.io/matrixdotorg/synapse:latest
+    restart: unless-stopped
+    env_file:
+      - run.env
+      - path: run.env.local
+        required: false
+    volumes:
+      - ./volumes/synapse/data:/data
+    depends_on:
+      - db
+#    ports:
+#      - 8448:8448/tcp
+    networks:
+      default:
+        ipv4_address: 10.1.16.2
+  db:
+    image: docker.io/postgres:15-alpine
+    restart: unless-stopped
+    env_file:
+      - db_run.env
+      - path: db_run.env.local
+        required: false
+    volumes:
+      - ./volumes/db/var/lib/postgresql/data:/var/lib/postgresql/data
+    networks:
+      default:
+        ipv4_address: 10.1.16.3
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.16.0/24
+          gateway: 10.1.16.1
