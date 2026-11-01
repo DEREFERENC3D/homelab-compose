@@ -1,2 +1,3 @@
 */volumes
+*/.env.local
 */run.env.local
