@@ -1,0 +1,19 @@
+services:
+  auth:
+    image: unmojang/drasl
+    container_name: minecraft-auth
+    restart: ${RESTART_POLICY}
+    volumes:
+      - ./volumes/drasl/etc/drasl:/etc/drasl:ro
+      - ./volumes/drasl/var/lib/drasl:/var/lib/drasl
+    networks:
+      default:
+        ipv4_address: 10.1.17.2
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.17.0/24
+          gateway: 10.1.17.1
