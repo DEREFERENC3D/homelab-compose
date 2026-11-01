@@ -1,14 +1,18 @@
 services:
   stalwart:
-    image: stalwartlabs/stalwart
+    image: stalwartlabs/stalwart:v0.16
     restart: unless-stopped
+    environment:
+      STALWART_PUBLIC_URL: https://stalwart.${DOMAIN}
     volumes:
-      - ./volumes/stalwart/opt/stalwart:/opt/stalwart
-      - /etc/acme:/opt/acme:ro
+      - ./volumes/stalwart/etc/stalwart:/etc/stalwart
+      - ./volumes/stalwart/var/lib/stalwart:/var/lib/stalwart
+      - ./volumes/stalwart/var/log/stalwart:/var/log/stalwart
+      - /etc/acme:/etc/acme:ro,U
     ports:
       - 143:143
       - 993:993
-      - 25:25
+      - "25:25"
       - 587:587
       - 465:465
     networks:
