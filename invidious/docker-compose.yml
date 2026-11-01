@@ -1,0 +1,90 @@
+version: "3"
+
+services:
+  invidious:
+    image: quay.io/invidious/invidious:latest
+    restart: ${RESTART_POLICY}
+    container_name: invidious
+    environment:
+      INVIDIOUS_CONFIG: |
+        db:
+          dbname: invidious
+          user: kemal
+          password: kemal
+          host: 10.1.18.4
+          port: 5432
+        registration_enabled: false
+        check_tables: true
+        invidious_companion:
+        - private_url: 'http://10.1.18.3:8282/companion'
+        invidious_companion_key: ${COMPANION_KEY}
+        hmac_key: ${HMAC_KEY}
+    healthcheck:
+      test: wget -nv --tries=1 --spider http://127.0.0.1:3000/api/v1/stats || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 2
+    logging:
+      options:
+        max-size: '1G'
+        max-file: '4'
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    depends_on:
+    - invidious-db
+    networks:
+      default:
+        ipv4_address: 10.1.18.2
+
+  companion:
+    image: quay.io/invidious/invidious-companion:latest
+    container_name: invidious-companion
+    restart: ${RESTART_POLICY}
+    environment:
+      - SERVER_SECRET_KEY=${COMPANION_KEY}
+    logging:
+      options:
+        max-size: '1G'
+        max-file: '4'
+    cap_drop:
+      - ALL
+    read_only: true
+    volumes:
+      - ./volumes/invidious-companion/var/tmp/youtubei.js:/var/tmp/youtubei.js:rw
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      default:
+        ipv4_address: 10.1.18.3
+
+  invidious-db:
+    image: postgres:14
+    container_name: invidious-db
+    restart: ${RESTART_POLICY}
+    volumes:
+      - ./volumes/invidious-db/var/lib/postgresql/data:/var/lib/postgresql/data
+      - ./volumes/invidious-db/config/sql:/config/sql
+      - ./volumes/invidious-db/docker-entrypoint-initdb.d/init-invidious-db.sh:/docker-entrypoint-initdb.d/init-invidious-db.sh
+    environment:
+      POSTGRES_DB: invidious
+      POSTGRES_USER: kemal
+      POSTGRES_PASSWORD: kemal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+    networks:
+      default:
+        ipv4_address: 10.1.18.4
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.18.0/24
+          gateway: 10.1.18.1
