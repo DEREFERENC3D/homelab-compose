@@ -1,0 +1,72 @@
+services:
+  # Note: MariaDB is external service. You can find more information about the configuration here:
+  # https://hub.docker.com/_/mariadb
+  db:
+    # Note: Check the recommend version here: https://docs.nextcloud.com/server/latest/admin_manual/installation/system_requirements.html#server
+    image: mariadb:lts
+    restart: unless-stopped
+    command: --transaction-isolation=READ-COMMITTED
+    volumes:
+      - ./volumes/db/var/lib/mysql:/var/lib/mysql
+    environment:
+      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=1
+      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      default:
+        ipv4_address: 10.1.14.2
+
+
+  # Note: Redis is an external service. You can find more information about the configuration here:
+  # https://hub.docker.com/_/redis
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    networks:
+      default:
+        ipv4_address: 10.1.14.3
+
+  app:
+    # listens on port 80
+    image: nextcloud:${VERSION}
+    container_name: nextcloud
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - db
+    volumes:
+      - ./volumes/app/var/www/html:/var/www/html
+    environment:
+      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=10.1.14.2
+      - REDIS_HOST=10.1.14.3
+      - JWT_SECRET_KEY=$JWT_SECRET_KEY
+    networks:
+      default:
+        ipv4_address: 10.1.14.4
+
+  whiteboard:
+    image: ghcr.io/nextcloud-releases/whiteboard:stable
+    depends_on:
+      - app
+    environment:
+      - NEXTCLOUD_URL=$NEXTCLOUD_URL
+      - JWT_SECRET_KEY=$JWT_SECRET_KEY
+    networks:
+      default:
+        ipv4_address: 10.1.14.5
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.14.0/24
+          gateway: 10.1.14.1

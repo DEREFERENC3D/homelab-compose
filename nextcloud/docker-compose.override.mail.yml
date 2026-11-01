@@ -1,0 +1,9 @@
+services:
+  app:
+    networks:
+      mail_default:
+        ipv4_address: 10.1.8.253
+
+networks:
+  mail_default:
+    external: true
