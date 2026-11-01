@@ -30,6 +30,38 @@ services:
       default:
         ipv4_address: 10.1.16.3
 
+  element-web:
+    image: docker.io/vectorim/element-web
+    restart: unless-stopped
+    env_file:
+      - element_run.env
+      - path: element_run.env.local
+        required: false
+    volumes:
+      - ./volumes/element-web/app/config.json:/app/config.json:ro
+    depends_on:
+      - synapse
+#    ports:
+#      - 8080:8080/tcp
+    networks:
+      default:
+        ipv4_address: 10.1.16.4
+
+  ketesa:
+    image: docker.io/etkecc/ketesa
+    restart: unless-stopped
+    volumes:
+      - ./volumes/ketesa/var/public/config.json:/var/public/config.json:ro
+    depends_on:
+      - synapse
+#    healthcheck:
+#      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/config.json >/dev/null 2>&1 || exit 1"]
+#      interval: 5s
+#      timeout: 5s
+    networks:
+      default:
+        ipv4_address: 10.1.16.5
+
 networks:
   default:
     ipam:
